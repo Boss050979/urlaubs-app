@@ -274,6 +274,13 @@
         const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         const dayNamesShort = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
+        // Einheitlicher, sehr schöner Hellblau-Ton für alle Abteilungen
+        const deptColorStyle = 'bg-sky-100 text-sky-700 border-sky-200';
+
+        function getDeptStyle(deptName) {
+            return deptColorStyle;
+        }
+
         function showAlert(title, message) {
             document.getElementById('alertTitle').textContent = title;
             document.getElementById('alertMessage').textContent = message;
@@ -405,10 +412,11 @@
                 tableHTML += `<tr><td colspan="${daysInMonth + 2}" class="p-10 text-center text-slate-500 font-medium">Keine Mitarbeiter vorhanden.</td></tr>`;
             } else {
                 employees.forEach(emp => {
+                    const deptStyle = getDeptStyle(emp.dept);
                     tableHTML += `<tr class="hover:bg-slate-200/50 transition-colors">`;
                     tableHTML += `<td class="p-3.5 sticky left-0 bg-calbg font-bold text-indigo-900 border-r border-calborder">
                         <div class="truncate max-w-[170px]">${emp.name}</div>
-                        <span class="text-[10px] text-red-600 font-bold px-2 py-0.5 rounded-md bg-red-100 border border-red-200 inline-block mt-1">${emp.dept}</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border inline-block mt-1 ${deptStyle}">${emp.dept}</span>
                     </td>`;
 
                     for (let d = 1; d <= daysInMonth; d++) {
@@ -457,11 +465,12 @@
                 let carryover = emp.carryoverByYear[year] || 0;
                 let totalClaim = emp.vacationDays + carryover;
                 let remaining = totalClaim - takenDays;
+                const deptStyle = getDeptStyle(emp.dept);
 
                 empTableHTML += `
                     <tr class="hover:bg-slate-200/50 transition-colors">
                         <td class="p-3.5 font-bold text-indigo-900">${emp.name}</td>
-                        <td class="p-3.5"><span class="bg-white border border-calborder text-slate-700 px-3 py-1 rounded-lg text-[11px] font-bold shadow-sm">${emp.dept}</span></td>
+                        <td class="p-3.5"><span class="border px-3 py-1 rounded-lg text-[11px] font-bold shadow-sm inline-block ${deptStyle}">${emp.dept}</span></td>
                         <td class="p-3.5 text-center font-bold text-slate-700">${emp.vacationDays} Tage</td>
                         <td class="p-3.5 text-center">
                             <input type="number" value="${carryover}" min="0" max="40" step="0.5" 
@@ -512,11 +521,15 @@
             }
             let html = '';
             employees.forEach((emp) => {
+                const deptStyle = getDeptStyle(emp.dept);
                 html += `
                     <div class="flex items-center justify-between p-3 bg-slate-950 border border-bordercolor rounded-xl">
                         <div>
                             <div class="text-xs font-bold text-slate-200">${emp.name}</div>
-                            <div class="text-[10px] text-red-400">${emp.dept} • ${emp.vacationDays} Tage</div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${deptStyle}">${emp.dept}</span>
+                                <span class="text-[10px] text-slate-400">${emp.vacationDays} Tage</span>
+                            </div>
                         </div>
                         <div class="flex items-center gap-1">
                             <button type="button" onclick="editEmployee('${emp.id}')" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"><i class="fa-solid fa-pen text-[10px]"></i></button>
