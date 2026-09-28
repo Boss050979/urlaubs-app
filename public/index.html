@@ -85,11 +85,10 @@
                 </button>
             </div>
 
-            <!-- Legend -->
+            <!-- Legend (Fortbildung entfernt) -->
             <div class="flex flex-wrap items-center gap-3 text-xs font-extrabold">
                 <span class="flex items-center gap-1.5 bg-sky-50 text-sky-800 px-3 py-1.5 rounded-xl border border-sky-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 shadow-xs"></span> Urlaub 🏖️</span>
                 <span class="flex items-center gap-1.5 bg-red-50 text-red-800 px-3 py-1.5 rounded-xl border border-red-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-red-500 to-rose-600 shadow-xs"></span> Krank 🤒</span>
-                <span class="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 shadow-xs"></span> Fortbildung 📚</span>
                 <span class="flex items-center gap-1.5 bg-teal-50 text-teal-800 px-3 py-1.5 rounded-xl border border-teal-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-teal-400 to-emerald-500 shadow-xs"></span> Sonderurlaub ✨</span>
                 <span class="flex items-center gap-1.5 bg-red-100 text-red-900 px-3 py-1.5 rounded-xl border border-red-200 shadow-xs"><span class="w-3 h-3 rounded-full bg-red-200"></span> Wochenende (Frei)</span>
             </div>
@@ -163,7 +162,6 @@
                     <select id="entryType" class="w-full bg-slate-50 border border-red-100 rounded-2xl p-3.5 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
                         <option value="vacation">Urlaub 🏖️</option>
                         <option value="sick">Krank 🤒</option>
-                        <option value="training">Fortbildung 📚</option>
                         <option value="special">Sonderurlaub ✨</option>
                     </select>
                 </div>
@@ -257,32 +255,52 @@
         </div>
     </div>
 
-    <!-- JavaScript Logik -->
+    <!-- JavaScript Logik mit Server-Anbindung -->
     <script>
-        let employees = JSON.parse(localStorage.getItem('elite_kranken_employees')) || [
-            { id: '1', name: 'Mustafa Yilmaz', dept: 'Fahrdienst', vacationDays: 30, extraDaysByYear: {} },
-            { id: '2', name: 'Anna Schmidt', dept: 'Disposition', vacationDays: 30, extraDaysByYear: {} },
-            { id: '3', name: 'Thomas Weber', dept: 'Fahrdienst', vacationDays: 28, extraDaysByYear: {} }
-        ];
-
-        let entries = JSON.parse(localStorage.getItem('elite_kranken_entries')) || [];
+        let employees = [];
+        let entries = [];
         let currentDate = new Date();
 
         const typeLabels = {
             vacation: 'Urlaub',
             sick: 'Krank',
-            training: 'Fortbildung',
             special: 'Sonderurlaub'
         };
 
         const typeConfig = {
             vacation: { class: 'bg-gradient-to-r from-sky-400 to-blue-500 text-white shadow-md shadow-blue-500/30 hover:scale-105 transition', icon: 'fa-check' },
             sick: { class: 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-md shadow-red-500/30 hover:scale-105 transition', icon: 'fa-xmark' },
-            training: { class: 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/30 hover:scale-105 transition', icon: 'fa-check' },
             special: { class: 'bg-gradient-to-r from-teal-400 to-emerald-500 text-white shadow-md shadow-teal-500/30 hover:scale-105 transition', icon: 'fa-check' }
         };
 
         const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+        // Daten vom Server laden
+        async function loadFromServer() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                employees = data.employees || [];
+                entries = data.entries || [];
+                initAppUI();
+            } catch (err) {
+                console.error("Fehler beim Laden der Daten:", err);
+                showAlert("Fehler", "Daten konnten nicht vom Server geladen werden.");
+            }
+        }
+
+        // Daten an den Server speichern
+        async function saveToServer() {
+            try {
+                await fetch('/api/data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ employees, entries })
+                });
+            } catch (err) {
+                console.error("Fehler beim Speichern der Daten:", err);
+            }
+        }
 
         function showAlert(title, message) {
             document.getElementById('alertTitle').textContent = title;
@@ -322,7 +340,7 @@
             return holidays;
         }
 
-        function initApp() {
+        function initAppUI() {
             const yearSelect = document.getElementById('selectYear');
             yearSelect.innerHTML = '';
             const curY = currentDate.getFullYear();
@@ -379,7 +397,7 @@
 
         function setToday() {
             currentDate = new Date();
-            initApp();
+            initAppUI();
         }
 
         function render() {
@@ -428,7 +446,6 @@
                         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                         const isHoliday = holidays[dateStr];
 
-                        // Prüfen ob für diesen Mitarbeiter an diesem Tag ein gültiger Urlaubseintrag vorliegt (Wochenenden werden hier konsequent ignoriert)
                         let entry = null;
                         if (!isWeekend) {
                             entry = entries.find(e => e.employeeId === emp.id && dateStr >= e.start && dateStr <= e.end);
@@ -439,7 +456,6 @@
                             const label = typeLabels[entry.type] || entry.type;
                             tableHTML += `<td class="p-1 text-center"><div onclick="editEntry('${entry.id}')" class="w-7 h-7 mx-auto rounded-xl flex items-center justify-center cursor-pointer text-xs ${cfg.class}" title="${label}"><i class="fa-solid ${cfg.icon} text-[10px]"></i></div></td>`;
                         } else if (isWeekend) {
-                            // WICHTIG: Kein Klick-Event mehr am Wochenende!
                             tableHTML += `<td class="p-1 text-center bg-red-100/50 rounded"><div class="w-7 h-7 mx-auto flex items-center justify-center text-red-300 text-xs font-bold" title="Wochenende (kein Arbeitstag)">—</div></td>`;
                         } else if (isHoliday) {
                             tableHTML += `<td class="p-1 text-center bg-rose-50/60 rounded" title="${isHoliday}"><div onclick="quickAdd('${emp.id}', '${dateStr}')" class="w-7 h-7 mx-auto rounded-xl hover:bg-rose-200/50 cursor-pointer transition flex items-center justify-center text-rose-400 hover:text-rose-700 font-black">+</div></td>`;
@@ -453,7 +469,6 @@
             tableHTML += `</tbody>`;
             document.getElementById('matrixTable').innerHTML = tableHTML;
 
-            // Mitarbeiter-Urlaubskonten Berechnung (nur Werktage Mo-Fr zählen)
             let empTableHTML = '';
             employees.forEach(emp => {
                 let takenDays = 0;
@@ -461,7 +476,6 @@
                     let start = new Date(e.start), end = new Date(e.end), curr = new Date(start);
                     while (curr <= end) {
                         let dayW = curr.getDay();
-                        // Nur Werktage Mo (1) bis Fr (5) zählen
                         if (curr.getFullYear() === year && dayW !== 0 && dayW !== 6) {
                             takenDays++;
                         }
@@ -541,7 +555,7 @@
             const temp = employees[index];
             employees[index] = employees[targetIndex];
             employees[targetIndex] = temp;
-            localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+            saveToServer();
             render();
         }
 
@@ -553,9 +567,9 @@
             let todayStr = new Date().toISOString().split('T')[0];
             let dObj = new Date(todayStr);
             if (dObj.getDay() === 0) {
-                dObj.setDate(dObj.getDate() + 1); // Wenn Sonntag, auf Montag springen
+                dObj.setDate(dObj.getDate() + 1);
             } else if (dObj.getDay() === 6) {
-                dObj.setDate(dObj.getDate() + 2); // Wenn Samstag, auf Montag springen
+                dObj.setDate(dObj.getDate() + 2);
             }
             todayStr = dObj.toISOString().split('T')[0];
             document.getElementById('entryStart').value = todayStr;
@@ -589,7 +603,7 @@
             document.getElementById('entryModal').classList.remove('hidden');
         }
 
-        function saveEntry(e) {
+        async function saveEntry(e) {
             e.preventDefault();
             const id = document.getElementById('entryId').value;
             const employeeId = document.getElementById('entryEmployee').value;
@@ -615,16 +629,16 @@
             } else {
                 entries.push({ id: 'e_' + Date.now(), employeeId, start, end, type });
             }
-            localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+            await saveToServer();
             closeModal('entryModal');
             render();
         }
 
-        function deleteCurrentEntry() {
+        async function deleteCurrentEntry() {
             const id = document.getElementById('entryId').value;
             if (id && confirm("Möchten Sie diesen Eintrag wirklich löschen?")) {
                 entries = entries.filter(e => e.id !== id);
-                localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+                await saveToServer();
                 closeModal('entryModal');
                 render();
             }
@@ -656,7 +670,7 @@
             document.getElementById('employeeModal').classList.remove('hidden');
         }
 
-        function saveEmployee(e) {
+        async function saveEmployee(e) {
             e.preventDefault();
             const id = document.getElementById('empId').value;
             const name = document.getElementById('empName').value;
@@ -669,17 +683,16 @@
             } else {
                 employees.push({ id: 'emp_' + Date.now(), name, dept, vacationDays, extraDaysByYear: {} });
             }
-            localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+            await saveToServer();
             resetEmployeeForm();
             render();
         }
 
-        function deleteEmployee(id) {
+        async function deleteEmployee(id) {
             if (confirm("Möchten Sie diesen Mitarbeiter und alle dazugehörigen Einträge wirklich löschen?")) {
                 employees = employees.filter(e => e.id !== id);
                 entries = entries.filter(e => e.employeeId !== id);
-                localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
-                localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+                await saveToServer();
                 render();
             }
         }
@@ -696,7 +709,7 @@
             document.getElementById('accountModal').classList.remove('hidden');
         }
 
-        function saveAccountAdjustment(e) {
+        async function saveAccountAdjustment(e) {
             e.preventDefault();
             const empId = document.getElementById('accEmpId').value;
             const extraDays = parseFloat(document.getElementById('accExtraDays').value);
@@ -706,7 +719,7 @@
             if (emp) {
                 if (!emp.extraDaysByYear) emp.extraDaysByYear = {};
                 emp.extraDaysByYear[year] = extraDays;
-                localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+                await saveToServer();
             }
             closeModal('accountModal');
             render();
@@ -716,7 +729,7 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        window.onload = initApp;
+        window.onload = loadFromServer;
     </script>
 </body>
 </html>
