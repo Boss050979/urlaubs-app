@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Krankenfahrdienst Düren - Urlaubsplaner</title>
+    <title>Elite Krankenfahrdienst Düren Urlaub</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome für Icons -->
@@ -24,7 +24,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-black tracking-tight flex items-center gap-2">
-                        Elite Krankenfahrdienst Düren
+                        Elite Krankenfahrdienst Düren Urlaub
                     </h1>
                 </div>
             </div>
@@ -460,7 +460,7 @@
                         } else if (isHoliday) {
                             tableHTML += `<td class="p-1 text-center bg-rose-50/60 rounded" title="${isHoliday}"><div onclick="quickAdd('${emp.id}', '${dateStr}')" class="w-7 h-7 mx-auto rounded-xl hover:bg-rose-200/50 cursor-pointer transition flex items-center justify-center text-rose-400 hover:text-rose-700 font-black">+</div></td>`;
                         } else {
-                            // Werktag in Blau angepasst
+                            // Werktag in Blau
                             tableHTML += `<td class="p-1 text-center"><div onclick="quickAdd('${emp.id}', '${dateStr}')" class="w-7 h-7 mx-auto rounded-xl hover:bg-sky-100 cursor-pointer transition flex items-center justify-center text-sky-400 hover:text-sky-700 font-black">+</div></td>`;
                         }
                     }
