@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Krankenfahrdienst Düren - Urlaubsplaner</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome für Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 via-rose-50 to-orange-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-red-700 via-red-600 to-rose-700 text-white shadow-xl">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white/20 backdrop-blur-md p-3 rounded-2xl shadow-inner border border-white/30 flex items-center justify-center">
+                    <i class="fa-solid fa-ambulance text-2xl text-yellow-300 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight flex items-center gap-2">
+                        Elite Krankenfahrdienst Düren
+                    </h1>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openEntryModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-xl text-sm font-extrabold shadow-lg shadow-emerald-500/25 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-lg"></i> Urlaub eintragen
+                </button>
+                <button onclick="openEmployeeModal()" class="bg-white/15 hover:bg-white/25 border border-white/30 text-white px-4 py-2.5 rounded-xl text-sm font-extrabold shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2 backdrop-blur-sm">
+                    <i class="fa-solid fa-user-plus text-yellow-300"></i> Mitarbeiter
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
+
+        <!-- 12-Monats Schnell-Übersicht -->
+        <div class="bg-white/90 backdrop-blur-xl p-4 rounded-3xl shadow-xl shadow-red-100/50 border border-white">
+            <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3 px-1">Monat direkt wählen</div>
+            <div id="quickMonthsGrid" class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+                <!-- JS befüllt -->
+            </div>
+        </div>
+
+        <!-- Controls / Filters -->
+        <div class="bg-white/90 backdrop-blur-xl p-5 rounded-3xl shadow-xl shadow-red-100/50 border border-white flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center bg-red-50 border border-red-100 rounded-2xl hover:bg-red-100 transition text-red-600 font-black shadow-sm">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <select id="selectMonth" onchange="updateFilter()" class="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 text-red-950 text-sm font-black rounded-2xl px-4 py-2.5 focus:ring-4 focus:ring-red-400/20 outline-none shadow-sm cursor-pointer">
+                        <option value="0">Januar</option>
+                        <option value="1">Februar</option>
+                        <option value="2">März</option>
+                        <option value="3">April</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juni</option>
+                        <option value="6">Juli</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">Oktober</option>
+                        <option value="10">November</option>
+                        <option value="11">Dezember</option>
+                    </select>
+                    <select id="selectYear" onchange="updateFilter()" class="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 text-red-950 text-sm font-black rounded-2xl px-4 py-2.5 focus:ring-4 focus:ring-red-400/20 outline-none shadow-sm cursor-pointer">
+                        <!-- JS befüllt -->
+                    </select>
+                </div>
+                <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center bg-red-50 border border-red-100 rounded-2xl hover:bg-red-100 transition text-red-600 font-black shadow-sm">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <button onclick="setToday()" class="text-xs bg-gradient-to-r from-slate-100 to-red-50 hover:from-red-100 hover:to-rose-100 text-red-700 px-4 py-2.5 rounded-2xl font-black transition border border-red-100 shadow-sm">
+                    Heute
+                </button>
+            </div>
+
+            <!-- Legend -->
+            <div class="flex flex-wrap items-center gap-3 text-xs font-extrabold">
+                <span class="flex items-center gap-1.5 bg-sky-50 text-sky-800 px-3 py-1.5 rounded-xl border border-sky-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 shadow-xs"></span> Urlaub 🏖️</span>
+                <span class="flex items-center gap-1.5 bg-red-50 text-red-800 px-3 py-1.5 rounded-xl border border-red-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-red-500 to-rose-600 shadow-xs"></span> Krank 🤒</span>
+                <span class="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 shadow-xs"></span> Fortbildung 📚</span>
+                <span class="flex items-center gap-1.5 bg-teal-50 text-teal-800 px-3 py-1.5 rounded-xl border border-teal-100 shadow-xs"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-teal-400 to-emerald-500 shadow-xs"></span> Sonderurlaub ✨</span>
+                <span class="flex items-center gap-1.5 bg-red-100 text-red-900 px-3 py-1.5 rounded-xl border border-red-200 shadow-xs"><span class="w-3 h-3 rounded-full bg-red-200"></span> Wochenende (Frei)</span>
+            </div>
+        </div>
+
+        <!-- Matrix / Kalender-Ansicht -->
+        <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl shadow-red-100/50 border border-white overflow-hidden">
+            <div class="overflow-x-auto p-2">
+                <table id="matrixTable" class="w-full text-left border-collapse text-sm">
+                    <!-- JS befüllt -->
+                </table>
+            </div>
+        </div>
+
+        <!-- Mitarbeiter & Resturlaub Übersicht -->
+        <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl shadow-red-100/50 border border-white p-6">
+            <h2 class="text-lg font-black text-slate-900 mb-5 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                Mitarbeiter & Urlaubskonten (<span id="currentYearDisplay" class="text-red-600"></span>)
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="border-b border-red-100 text-red-950 bg-red-50/70 rounded-2xl font-black">
+                            <th class="p-4 rounded-l-2xl">Mitarbeiter</th>
+                            <th class="p-4">Abteilung</th>
+                            <th class="p-4 text-center">Urlaubsanspruch</th>
+                            <th class="p-4 text-center">Genommen (Werktage)</th>
+                            <th class="p-4 text-center">Resturlaub</th>
+                            <th class="p-4 text-right rounded-r-2xl">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeTableBody" class="divide-y divide-slate-100 font-bold">
+                        <!-- JS befüllt -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Urlaub / Abwesenheit eintragen -->
+    <div id="entryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-white transform transition-all scale-100">
+            <div class="bg-gradient-to-r from-red-700 to-rose-700 text-white px-6 py-5 flex justify-between items-center">
+                <h3 id="modalTitle" class="font-black text-lg flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-yellow-300"></i> Abwesenheit eintragen</h3>
+                <button onclick="closeModal('entryModal')" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="entryForm" onsubmit="saveEntry(event)" class="p-6 space-y-5">
+                <input type="hidden" id="entryId">
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Mitarbeiter</label>
+                    <select id="entryEmployee" required class="w-full bg-slate-50 border border-red-100 rounded-2xl p-3.5 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                        <!-- JS befüllt -->
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Von Datum (Werktag)</label>
+                        <input type="date" id="entryStart" required class="w-full bg-slate-50 border border-red-100 rounded-2xl p-3.5 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Bis Datum (Werktag)</label>
+                        <input type="date" id="entryEnd" required class="w-full bg-slate-50 border border-red-100 rounded-2xl p-3.5 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Art der Abwesenheit</label>
+                    <select id="entryType" class="w-full bg-slate-50 border border-red-100 rounded-2xl p-3.5 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                        <option value="vacation">Urlaub 🏖️</option>
+                        <option value="sick">Krank 🤒</option>
+                        <option value="training">Fortbildung 📚</option>
+                        <option value="special">Sonderurlaub ✨</option>
+                    </select>
+                </div>
+                <div class="flex justify-between items-center pt-3">
+                    <button type="button" id="deleteEntryBtn" onclick="deleteCurrentEntry()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-2.5 rounded-2xl text-sm font-black transition flex items-center gap-1.5"><i class="fa-solid fa-trash-can"></i> Löschen</button>
+                    <div class="flex gap-2 ml-auto">
+                        <button type="button" onclick="closeModal('entryModal')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-2xl text-sm font-black transition">Abbrechen</button>
+                        <button type="submit" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-6 py-2.5 rounded-2xl text-sm font-black shadow-lg shadow-red-500/25 transition">Speichern</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Mitarbeiter verwalten / sortieren -->
+    <div id="employeeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-white max-h-[90vh] flex flex-col">
+            <div class="bg-gradient-to-r from-red-700 to-rose-700 text-white px-6 py-5 flex justify-between items-center shrink-0">
+                <h3 id="empModalTitle" class="font-black text-lg flex items-center gap-2"><i class="fa-solid fa-user-gear text-yellow-300"></i> Mitarbeiter verwalten & sortieren</h3>
+                <button onclick="closeModal('employeeModal')" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6">
+                <!-- Formular -->
+                <form id="employeeForm" onsubmit="saveEmployee(event)" class="bg-red-50/50 p-4 rounded-2xl border border-red-100 space-y-4">
+                    <input type="hidden" id="empId">
+                    <div class="text-xs font-black text-red-900 uppercase tracking-wider mb-1" id="empFormLegend">Neuen Mitarbeiter anlegen</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Vollständiger Name</label>
+                            <input type="text" id="empName" required placeholder="z.B. Max Mustermann" class="w-full bg-white border border-red-100 rounded-xl p-3 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Abteilung</label>
+                            <input type="text" id="empDept" required placeholder="z.B. Fahrdienst" class="w-full bg-white border border-red-100 rounded-xl p-3 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Jahresurlaub (Tage)</label>
+                        <input type="number" id="empVacationDays" required value="30" min="0" max="60" class="w-full bg-white border border-red-100 rounded-xl p-3 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                    </div>
+                    <div class="flex justify-end gap-2 pt-1">
+                        <button type="button" id="cancelEmpEditBtn" onclick="resetEmployeeForm()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-xs font-black transition">Abbrechen</button>
+                        <button type="submit" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-5 py-2 rounded-xl text-xs font-black shadow-md shadow-red-500/25 transition">Speichern</button>
+                    </div>
+                </form>
+
+                <!-- Liste mit Sortier-Pfeilen -->
+                <div>
+                    <div class="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Reihenfolge anpassen (Auf / Ab)</div>
+                    <div id="modalEmployeeList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <!-- JS befüllt -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Urlaubskonto anpassen -->
+    <div id="accountModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-white">
+            <div class="bg-gradient-to-r from-red-700 to-rose-700 text-white px-6 py-5 flex justify-between items-center">
+                <h3 class="font-black text-lg flex items-center gap-2"><i class="fa-solid fa-sliders text-yellow-300"></i> Konto anpassen</h3>
+                <button onclick="closeModal('accountModal')" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="accountForm" onsubmit="saveAccountAdjustment(event)" class="p-6 space-y-5">
+                <input type="hidden" id="accEmpId">
+                <div>
+                    <p id="accEmpName" class="text-sm font-black text-slate-900 mb-1"></p>
+                    <p class="text-xs text-slate-500 mb-4">Trage hier z.B. Resturlaub aus dem Vorjahr oder individuelle Korrekturen ein.</p>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Zusätzliche / Resttage (+/-)</label>
+                    <input type="number" id="accExtraDays" required value="0" step="0.5" class="w-full bg-slate-50 border border-red-100 rounded-2xl p-3.5 text-sm font-bold focus:ring-4 focus:ring-red-400/25 outline-none shadow-sm">
+                    <p class="text-[11px] text-red-600 mt-2 font-bold">✨ Positive Werte erhöhen den Gesamtanspruch für das laufende Jahr.</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModal('accountModal')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-2xl text-sm font-black transition">Abbrechen</button>
+                    <button type="submit" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-6 py-2.5 rounded-2xl text-sm font-black shadow-lg shadow-red-500/25 transition">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Schicke Benachrichtigung / Meldung -->
+    <div id="alertModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-white text-center p-6 space-y-4">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-inner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="alertTitle" class="font-black text-lg text-slate-900">Hinweis</h3>
+            <p id="alertMessage" class="text-sm font-bold text-slate-600"></p>
+            <button onclick="closeModal('alertModal')" class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 text-white py-3 rounded-2xl text-sm font-black shadow-lg shadow-red-500/25 transition">Verstanden</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logik -->
+    <script>
+        let employees = JSON.parse(localStorage.getItem('elite_kranken_employees')) || [
+            { id: '1', name: 'Mustafa Yilmaz', dept: 'Fahrdienst', vacationDays: 30, extraDaysByYear: {} },
+            { id: '2', name: 'Anna Schmidt', dept: 'Disposition', vacationDays: 30, extraDaysByYear: {} },
+            { id: '3', name: 'Thomas Weber', dept: 'Fahrdienst', vacationDays: 28, extraDaysByYear: {} }
+        ];
+
+        let entries = JSON.parse(localStorage.getItem('elite_kranken_entries')) || [];
+        let currentDate = new Date();
+
+        const typeLabels = {
+            vacation: 'Urlaub',
+            sick: 'Krank',
+            training: 'Fortbildung',
+            special: 'Sonderurlaub'
+        };
+
+        const typeConfig = {
+            vacation: { class: 'bg-gradient-to-r from-sky-400 to-blue-500 text-white shadow-md shadow-blue-500/30 hover:scale-105 transition', icon: 'fa-check' },
+            sick: { class: 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-md shadow-red-500/30 hover:scale-105 transition', icon: 'fa-xmark' },
+            training: { class: 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/30 hover:scale-105 transition', icon: 'fa-check' },
+            special: { class: 'bg-gradient-to-r from-teal-400 to-emerald-500 text-white shadow-md shadow-teal-500/30 hover:scale-105 transition', icon: 'fa-check' }
+        };
+
+        const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function getHolidays(year) {
+            const holidays = {};
+            holidays[`${year}-01-01`] = 'Neujahr';
+            holidays[`${year}-05-01`] = 'Tag der Arbeit';
+            holidays[`${year}-10-03`] = 'Tag der Deutschen Einheit';
+            holidays[`${year}-11-01`] = 'Allerheiligen';
+            holidays[`${year}-12-25`] = '1. Weihnachtstag';
+            holidays[`${year}-12-26`] = '2. Weihnachtstag';
+
+            const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+            const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+            const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            const month = Math.floor((h + l - 7 * m + 114) / 31);
+            const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+            const easterSunday = new Date(year, month - 1, day);
+            const addDays = (date, days) => {
+                const res = new Date(date);
+                res.setDate(res.getDate() + days);
+                return res.toISOString().split('T')[0];
+            };
+
+            holidays[addDays(easterSunday, -2)] = 'Karfreitag';
+            holidays[addDays(easterSunday, 1)] = 'Ostermontag';
+            holidays[addDays(easterSunday, 39)] = 'Christi Himmelfahrt';
+            holidays[addDays(easterSunday, 50)] = 'Pfingstmontag';
+            holidays[addDays(easterSunday, 60)] = 'Fronleichnam';
+            return holidays;
+        }
+
+        function initApp() {
+            const yearSelect = document.getElementById('selectYear');
+            yearSelect.innerHTML = '';
+            const curY = currentDate.getFullYear();
+            for (let y = 2024; y <= 2040; y++) {
+                let opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if (y === curY) opt.selected = true;
+                yearSelect.appendChild(opt);
+            }
+            document.getElementById('selectMonth').value = currentDate.getMonth();
+            renderQuickMonths();
+            render();
+        }
+
+        function renderQuickMonths() {
+            const grid = document.getElementById('quickMonthsGrid');
+            grid.innerHTML = '';
+            const curM = currentDate.getMonth();
+            monthNames.forEach((name, idx) => {
+                let isSelected = (idx === curM);
+                let btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `py-2 px-1 text-xs font-black rounded-2xl transition border shadow-xs ${
+                    isSelected 
+                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white border-red-500 shadow-md shadow-red-500/30 scale-105' 
+                        : 'bg-white/80 hover:bg-red-50 text-slate-700 border-red-100'
+                }`;
+                btn.textContent = name.substring(0, 3);
+                btn.onclick = () => {
+                    currentDate.setMonth(idx);
+                    document.getElementById('selectMonth').value = idx;
+                    renderQuickMonths();
+                    render();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateFilter() {
+            currentDate.setFullYear(parseInt(document.getElementById('selectYear').value));
+            currentDate.setMonth(parseInt(document.getElementById('selectMonth').value));
+            renderQuickMonths();
+            render();
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            document.getElementById('selectYear').value = currentDate.getFullYear();
+            document.getElementById('selectMonth').value = currentDate.getMonth();
+            renderQuickMonths();
+            render();
+        }
+
+        function setToday() {
+            currentDate = new Date();
+            initApp();
+        }
+
+        function render() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('currentYearDisplay').textContent = year;
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const holidays = getHolidays(year);
+
+            let tableHTML = `<thead><tr class="border-b border-red-100 text-slate-700 bg-red-50/70 font-black">`;
+            tableHTML += `<th class="p-3.5 sticky left-0 bg-red-50/95 backdrop-blur-md z-10 min-w-[200px]">Mitarbeiter</th>`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateObj = new Date(year, month, d);
+                const dayOfWeek = dateObj.getDay();
+                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                const isHoliday = holidays[dateStr];
+
+                let bgClass = "bg-transparent";
+                let tooltip = "";
+                if (isHoliday) {
+                    bgClass = "bg-rose-300/90 text-rose-950 font-black rounded border-b-2 border-rose-500";
+                    tooltip = holidays[dateStr];
+                } else if (isWeekend) {
+                    bgClass = "bg-red-100/90 text-red-900 font-black rounded";
+                    tooltip = "Wochenende";
+                }
+
+                tableHTML += `<th class="p-2 text-center w-9 text-sm font-black ${bgClass}" title="${tooltip}">${d}</th>`;
+            }
+            tableHTML += `</tr></thead><tbody class="divide-y divide-red-50">`;
+
+            if (employees.length === 0) {
+                tableHTML += `<tr><td colspan="${daysInMonth + 1}" class="p-8 text-center text-slate-400 font-bold">Keine Mitarbeiter vorhanden. Bitte oben rechts hinzufügen.</td></tr>`;
+            } else {
+                employees.forEach(emp => {
+                    tableHTML += `<tr class="hover:bg-red-50/40 transition">`;
+                    tableHTML += `<td class="p-3.5 sticky left-0 bg-white/95 backdrop-blur-md font-black text-slate-900 shadow-xs">${emp.name}<br><span class="text-[11px] text-red-600 font-extrabold px-2 py-0.5 rounded-full bg-red-50 inline-block mt-0.5">${emp.dept}</span></td>`;
+
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                        const dateObj = new Date(year, month, d);
+                        const dayOfWeek = dateObj.getDay();
+                        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                        const isHoliday = holidays[dateStr];
+
+                        // Prüfen ob für diesen Mitarbeiter an diesem Tag ein gültiger Urlaubseintrag vorliegt (Wochenenden werden hier konsequent ignoriert)
+                        let entry = null;
+                        if (!isWeekend) {
+                            entry = entries.find(e => e.employeeId === emp.id && dateStr >= e.start && dateStr <= e.end);
+                        }
+
+                        if (entry) {
+                            const cfg = typeConfig[entry.type] || { class: 'bg-blue-500 text-white', icon: 'fa-check' };
+                            const label = typeLabels[entry.type] || entry.type;
+                            tableHTML += `<td class="p-1 text-center"><div onclick="editEntry('${entry.id}')" class="w-7 h-7 mx-auto rounded-xl flex items-center justify-center cursor-pointer text-xs ${cfg.class}" title="${label}"><i class="fa-solid ${cfg.icon} text-[10px]"></i></div></td>`;
+                        } else if (isWeekend) {
+                            // WICHTIG: Kein Klick-Event mehr am Wochenende!
+                            tableHTML += `<td class="p-1 text-center bg-red-100/50 rounded"><div class="w-7 h-7 mx-auto flex items-center justify-center text-red-300 text-xs font-bold" title="Wochenende (kein Arbeitstag)">—</div></td>`;
+                        } else if (isHoliday) {
+                            tableHTML += `<td class="p-1 text-center bg-rose-50/60 rounded" title="${isHoliday}"><div onclick="quickAdd('${emp.id}', '${dateStr}')" class="w-7 h-7 mx-auto rounded-xl hover:bg-rose-200/50 cursor-pointer transition flex items-center justify-center text-rose-400 hover:text-rose-700 font-black">+</div></td>`;
+                        } else {
+                            tableHTML += `<td class="p-1 text-center"><div onclick="quickAdd('${emp.id}', '${dateStr}')" class="w-7 h-7 mx-auto rounded-xl hover:bg-red-100 cursor-pointer transition flex items-center justify-center text-red-300 hover:text-red-700 font-black">+</div></td>`;
+                        }
+                    }
+                    tableHTML += `</tr>`;
+                });
+            }
+            tableHTML += `</tbody>`;
+            document.getElementById('matrixTable').innerHTML = tableHTML;
+
+            // Mitarbeiter-Urlaubskonten Berechnung (nur Werktage Mo-Fr zählen)
+            let empTableHTML = '';
+            employees.forEach(emp => {
+                let takenDays = 0;
+                entries.filter(e => e.employeeId === emp.id && e.type === 'vacation').forEach(e => {
+                    let start = new Date(e.start), end = new Date(e.end), curr = new Date(start);
+                    while (curr <= end) {
+                        let dayW = curr.getDay();
+                        // Nur Werktage Mo (1) bis Fr (5) zählen
+                        if (curr.getFullYear() === year && dayW !== 0 && dayW !== 6) {
+                            takenDays++;
+                        }
+                        curr.setDate(curr.getDate() + 1);
+                    }
+                });
+
+                if (!emp.extraDaysByYear) emp.extraDaysByYear = {};
+                let extra = emp.extraDaysByYear[year] || 0;
+                let totalClaim = emp.vacationDays + extra;
+                let remaining = totalClaim - takenDays;
+
+                empTableHTML += `
+                    <tr class="hover:bg-red-50/40 transition">
+                        <td class="p-4 font-black text-slate-900">${emp.name}</td>
+                        <td class="p-4"><span class="bg-gradient-to-r from-red-100 to-rose-100 text-red-800 px-3 py-1 rounded-full text-xs font-black shadow-xs">${emp.dept}</span></td>
+                        <td class="p-4 text-center font-black text-slate-800">
+                            ${emp.vacationDays} ${extra !== 0 ? `<span class="text-xs font-black ${extra > 0 ? 'text-emerald-600' : 'text-rose-600'}">(${extra > 0 ? '+' : ''}${extra})</span>` : ''}
+                        </td>
+                        <td class="p-4 text-center text-blue-600 font-black">${takenDays} Tage</td>
+                        <td class="p-4 text-center font-black text-base ${remaining < 0 ? 'text-rose-600' : 'text-emerald-600'}">${remaining} Tage</td>
+                        <td class="p-4 text-right space-x-1">
+                            <button onclick="openAccountModal('${emp.id}')" class="text-slate-400 hover:text-emerald-600 p-2 rounded-xl hover:bg-emerald-50 transition shadow-xs" title="Urlaubskonto anpassen"><i class="fa-solid fa-sliders"></i></button>
+                            <button onclick="editEmployee('${emp.id}')" class="text-slate-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition shadow-xs" title="Mitarbeiter bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteEmployee('${emp.id}')" class="text-slate-400 hover:text-rose-600 p-2 rounded-xl hover:bg-rose-50 transition shadow-xs" title="Löschen"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('employeeTableBody').innerHTML = empTableHTML;
+
+            const empSelect = document.getElementById('entryEmployee');
+            empSelect.innerHTML = '';
+            employees.forEach(emp => {
+                let opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.textContent = `${emp.name} (${emp.dept})`;
+                empSelect.appendChild(opt);
+            });
+
+            renderModalEmployeeList();
+        }
+
+        function renderModalEmployeeList() {
+            const list = document.getElementById('modalEmployeeList');
+            if (employees.length === 0) {
+                list.innerHTML = '<div class="text-xs text-slate-400 font-bold p-3 text-center">Keine Mitarbeiter vorhanden.</div>';
+                return;
+            }
+            let html = '';
+            employees.forEach((emp, index) => {
+                html += `
+                    <div class="flex items-center justify-between p-3 bg-white border border-red-100 rounded-2xl shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col gap-0.5">
+                                <button type="button" onclick="moveEmployee(${index}, -1)" ${index === 0 ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="text-xs text-slate-400 hover:text-red-600 p-0.5"><i class="fa-solid fa-chevron-up"></i></button>
+                                <button type="button" onclick="moveEmployee(${index}, 1)" ${index === employees.length - 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="text-xs text-slate-400 hover:text-red-600 p-0.5"><i class="fa-solid fa-chevron-down"></i></button>
+                            </div>
+                            <div>
+                                <div class="text-sm font-black text-slate-900">${emp.name}</div>
+                                <div class="text-[11px] text-red-600 font-bold">${emp.dept} • ${emp.vacationDays} Tage Anspruch</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="editEmployee('${emp.id}')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition" title="Bearbeiten"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button type="button" onclick="deleteEmployee('${emp.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition" title="Löschen"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function moveEmployee(index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= employees.length) return;
+            const temp = employees[index];
+            employees[index] = employees[targetIndex];
+            employees[targetIndex] = temp;
+            localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+            render();
+        }
+
+        function openEntryModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-calendar-plus text-yellow-300"></i> Abwesenheit eintragen';
+            document.getElementById('entryId').value = '';
+            document.getElementById('entryForm').reset();
+            document.getElementById('deleteEntryBtn').classList.add('hidden');
+            let todayStr = new Date().toISOString().split('T')[0];
+            let dObj = new Date(todayStr);
+            if (dObj.getDay() === 0) {
+                dObj.setDate(dObj.getDate() + 1); // Wenn Sonntag, auf Montag springen
+            } else if (dObj.getDay() === 6) {
+                dObj.setDate(dObj.getDate() + 2); // Wenn Samstag, auf Montag springen
+            }
+            todayStr = dObj.toISOString().split('T')[0];
+            document.getElementById('entryStart').value = todayStr;
+            document.getElementById('entryEnd').value = todayStr;
+            document.getElementById('entryModal').classList.remove('hidden');
+        }
+
+        function quickAdd(empId, dateStr) {
+            const dObj = new Date(dateStr);
+            const dayW = dObj.getDay();
+            if (dayW === 0 || dayW === 6) {
+                showAlert("Wochenende", "Samstage und Sonntage sind arbeitsfrei und können nicht bebucht werden.");
+                return;
+            }
+            openEntryModal();
+            document.getElementById('entryEmployee').value = empId;
+            document.getElementById('entryStart').value = dateStr;
+            document.getElementById('entryEnd').value = dateStr;
+        }
+
+        function editEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-yellow-300"></i> Abwesenheit bearbeiten';
+            document.getElementById('entryId').value = entry.id;
+            document.getElementById('entryEmployee').value = entry.employeeId;
+            document.getElementById('entryStart').value = entry.start;
+            document.getElementById('entryEnd').value = entry.end;
+            document.getElementById('entryType').value = entry.type;
+            document.getElementById('deleteEntryBtn').classList.remove('hidden');
+            document.getElementById('entryModal').classList.remove('hidden');
+        }
+
+        function saveEntry(e) {
+            e.preventDefault();
+            const id = document.getElementById('entryId').value;
+            const employeeId = document.getElementById('entryEmployee').value;
+            const start = document.getElementById('entryStart').value;
+            const end = document.getElementById('entryEnd').value;
+            const type = document.getElementById('entryType').value;
+
+            if (start > end) {
+                showAlert("Ungültiger Zeitraum", "Das Startdatum muss vor oder gleich dem Enddatum sein.");
+                return;
+            }
+
+            const startDateObj = new Date(start);
+            const endDateObj = new Date(end);
+            if (startDateObj.getDay() === 0 || startDateObj.getDay() === 6 || endDateObj.getDay() === 0 || endDateObj.getDay() === 6) {
+                showAlert("Wochenende geschützt", "Start- oder Enddatum dürfen nicht auf einen Samstag oder Sonntag fallen.");
+                return;
+            }
+
+            if (id) {
+                let entry = entries.find(e => e.id === id);
+                if (entry) { entry.employeeId = employeeId; entry.start = start; entry.end = end; entry.type = type; }
+            } else {
+                entries.push({ id: 'e_' + Date.now(), employeeId, start, end, type });
+            }
+            localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+            closeModal('entryModal');
+            render();
+        }
+
+        function deleteCurrentEntry() {
+            const id = document.getElementById('entryId').value;
+            if (id && confirm("Möchten Sie diesen Eintrag wirklich löschen?")) {
+                entries = entries.filter(e => e.id !== id);
+                localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+                closeModal('entryModal');
+                render();
+            }
+        }
+
+        function openEmployeeModal() {
+            resetEmployeeForm();
+            document.getElementById('employeeModal').classList.remove('hidden');
+        }
+
+        function resetEmployeeForm() {
+            document.getElementById('empId').value = '';
+            document.getElementById('empName').value = '';
+            document.getElementById('empDept').value = '';
+            document.getElementById('empVacationDays').value = '30';
+            document.getElementById('empFormLegend').textContent = 'Neuen Mitarbeiter anlegen';
+            document.getElementById('cancelEmpEditBtn').classList.add('hidden');
+        }
+
+        function editEmployee(id) {
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            document.getElementById('empId').value = emp.id;
+            document.getElementById('empName').value = emp.name;
+            document.getElementById('empDept').value = emp.dept;
+            document.getElementById('empVacationDays').value = emp.vacationDays;
+            document.getElementById('empFormLegend').textContent = `Mitarbeiter bearbeiten: ${emp.name}`;
+            document.getElementById('cancelEmpEditBtn').classList.remove('hidden');
+            document.getElementById('employeeModal').classList.remove('hidden');
+        }
+
+        function saveEmployee(e) {
+            e.preventDefault();
+            const id = document.getElementById('empId').value;
+            const name = document.getElementById('empName').value;
+            const dept = document.getElementById('empDept').value;
+            const vacationDays = parseInt(document.getElementById('empVacationDays').value);
+
+            if (id) {
+                let emp = employees.find(e => e.id === id);
+                if (emp) { emp.name = name; emp.dept = dept; emp.vacationDays = vacationDays; }
+            } else {
+                employees.push({ id: 'emp_' + Date.now(), name, dept, vacationDays, extraDaysByYear: {} });
+            }
+            localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+            resetEmployeeForm();
+            render();
+        }
+
+        function deleteEmployee(id) {
+            if (confirm("Möchten Sie diesen Mitarbeiter und alle dazugehörigen Einträge wirklich löschen?")) {
+                employees = employees.filter(e => e.id !== id);
+                entries = entries.filter(e => e.employeeId !== id);
+                localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+                localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+                render();
+            }
+        }
+
+        function openAccountModal(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            const year = currentDate.getFullYear();
+            if (!emp.extraDaysByYear) emp.extraDaysByYear = {};
+
+            document.getElementById('accEmpId').value = emp.id;
+            document.getElementById('accEmpName').textContent = `${emp.name} (Jahr: ${year})`;
+            document.getElementById('accExtraDays').value = emp.extraDaysByYear[year] || 0;
+            document.getElementById('accountModal').classList.remove('hidden');
+        }
+
+        function saveAccountAdjustment(e) {
+            e.preventDefault();
+            const empId = document.getElementById('accEmpId').value;
+            const extraDays = parseFloat(document.getElementById('accExtraDays').value);
+            const year = currentDate.getFullYear();
+
+            let emp = employees.find(e => e.id === empId);
+            if (emp) {
+                if (!emp.extraDaysByYear) emp.extraDaysByYear = {};
+                emp.extraDaysByYear[year] = extraDays;
+                localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+            }
+            closeModal('accountModal');
+            render();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

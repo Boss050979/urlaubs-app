@@ -1,0 +1,15 @@
+{
+  name elite-urlaubsplaner,
+  version 1.0.0,
+  description Urlaubsplaner Web App für den Elite Krankenfahrdienst Düren,
+  main server.js,
+  scripts {
+    start node server.js
+  },
+  dependencies {
+    express ^4.19.2
+  },
+  engines {
+    node =18.0.0
+  }
+}
