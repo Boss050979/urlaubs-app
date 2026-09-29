@@ -1,250 +1,691 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Telefonbuch Düren & Köln (Live Web-App)</title>
-<style>
-  * { box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1e293b; background: #f1f5f9; margin: 0; padding: 12px; }
-  .card { max-width: 1200px; margin: 0 auto; background: #ffffff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  h1 { font-size: 1.3rem; color: #1e3a8a; margin: 0 0 6px 0; }
-  .sub { color: #64748b; font-size: 0.85rem; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-  
-  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-  .tab { padding: 6px 12px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 20px; font-weight: 600; font-size: 0.8rem; color: #475569; cursor: pointer; }
-  .tab.active { background: #2563eb; color: #ffffff; border-color: #2563eb; }
-  
-  .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-  .search-container { flex: 1; background: #fef08a; padding: 10px; border-radius: 8px; border: 2px solid #eab308; min-width: 250px; }
-  .search-container label { font-weight: 700; color: #854d0e; font-size: 0.85rem; display: block; margin-bottom: 4px; }
-  .search-container input { width: 100%; padding: 8px; font-size: 1rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #fff; }
-  
-  .action-box { background: #e0f2fe; padding: 10px; border-radius: 8px; border: 2px solid #0284c7; display: flex; align-items: center; }
-  .btn-add { background: #0284c7; color: white; border: none; padding: 10px 16px; font-weight: 700; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-  .btn-add:hover { background: #0369a1; }
-  
-  .info { font-size: 0.8rem; color: #64748b; margin-bottom: 8px; font-weight: 600; }
-  
-  .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 60vh; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; white-space: nowrap; }
-  th { background: #1e3a8a; color: #ffffff; padding: 8px 10px; font-size: 0.75rem; text-transform: uppercase; position: sticky; top: 0; z-index: 10; }
-  td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
-  tr:nth-child(even) { background: #f8fafc; }
-  
-  .badge { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; }
-  .pkv { background: #fef3c7; color: #92400e; }
-  .gkv { background: #dcfce7; color: #166534; }
-  .unklar { background: #e2e8f0; color: #475569; }
-  
-  a.web-link { color: #2563eb; text-decoration: none; font-weight: 600; }
-  a.web-link:hover { text-decoration: underline; }
-
-  .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-  .modal-content { background: white; padding: 20px; border-radius: 10px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; }
-  .modal-content h2 { margin-top: 0; font-size: 1.1rem; color: #1e3a8a; }
-  .form-group { margin-bottom: 10px; }
-  .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 3px; }
-  .form-group input { width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9rem; }
-  .modal-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; }
-  .btn-save { background: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-  .btn-cancel { background: #64748b; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-  .btn-del { background: #dc2626; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-right: 4px; }
-  .btn-edit { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
-</style>
-</head>
-<body>
-
-<div class="card">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <h1>📞 Telefonbuch Düren & Köln (Live Web-App)</h1>
-    <span style="font-size:0.75rem; background:#dcfce7; color:#166534; padding:4px 8px; border-radius:12px; font-weight:700;">🟢 Live Server verbunden</span>
-  </div>
-  <div class="sub">
-    <span>Echtzeit-Synchronisation über SQLite-Datenbank</span>
-    <button onclick="loadData()" style="background:none; border:1px solid #cbd5e1; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:0.75rem;">🔄 Neu laden</button>
-  </div>
-  
-  <div class="tabs" id="tabs"></div>
-  
-  <div class="controls">
-    <div class="search-container">
-      <label for="search">🔍 Live-Suchfeld:</label>
-      <input type="search" id="search" placeholder="Name, Straße, PLZ, Telefon eingeben..." autocomplete="off">
-    </div>
-    <div class="action-box" id="addActionBox" style="display:none;">
-      <button class="btn-add" onclick="openAddModal()">➕ Neuen Eintrag hinzufügen</button>
-    </div>
-  </div>
-  
-  <div class="info" id="count">0 Einträge</div>
-  
-  <div class="table-responsive">
-    <table>
-      <thead><tr id="thead"></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-</div>
-
-<div class="modal" id="entryModal">
-  <div class="modal-content">
-    <h2 id="modalTitle">Eintrag</h2>
-    <div id="modalFormFields"></div>
-    <div class="modal-buttons">
-      <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
-      <button class="btn-save" onclick="saveEntryData()">Speichern</button>
-    </div>
-  </div>
-</div>
-
-<script>
-let allData = [];
-let editId = null;
-const categoryCols = {
-  "Düren – Patienten": ["Patienten-ID", "Nachname", "Vorname", "Geburtsdatum", "Straße", "PLZ", "Ort", "Telefonnummer", "Versicherung", "Zugewiesene Einrichtung", "Notizen"],
-  "Düren – Heime": ["Einrichtung", "Straße", "PLZ", "Ort", "Telefonnummer", "PKV", "GKV", "Website", "Notizen"],
-  "Düren – Krankenhäuser": ["Einrichtung", "Straße", "PLZ", "Ort", "Telefonnummer", "PKV", "GKV", "Website", "Notizen"],
-  "Köln – Patienten": ["Patienten-ID", "Nachname", "Vorname", "Geburtsdatum", "Straße", "PLZ", "Ort", "Telefonnummer", "Versicherung", "Zugewiesene Einrichtung", "Notizen"],
-  "Köln – Heime": ["Einrichtung", "Straße", "PLZ", "Ort", "Telefonnummer", "PKV", "GKV", "Website", "Notizen"],
-  "Köln – Krankenhäuser": ["Einrichtung", "Straße", "PLZ", "Ort", "Telefonnummer", "PKV", "GKV", "Website", "Notizen"]
-};
-
-var activeTab = "ALLE";
-
-async function loadData() {
-  try {
-    const res = await fetch('/api/data');
-    allData = await res.json();
-    initTabs();
-    render();
-  } catch (e) {
-    console.error("Fehler beim Laden", e);
-  }
-}
-
-function initTabs() {
-  var tabsContainer = document.getElementById("tabs");
-  var keys = ["ALLE"].concat(Object.keys(categoryCols));
-  tabsContainer.innerHTML = "";
-  keys.forEach(k => {
-    var btn = document.createElement("button");
-    btn.className = "tab" + (k === activeTab ? " active" : "");
-    btn.textContent = k === "ALLE" ? "🔍 Alle (Gesamtsuche)" : k;
-    btn.onclick = () => { activeTab = k; initTabs(); render(); };
-    tabsContainer.appendChild(btn);
-  });
-}
-
-function formatCell(val) {
-  if (!val) return "";
-  let strVal = String(val).trim();
-  
-  if (strVal === "PKV") return '<span class="badge pkv">PKV</span>';
-  if (strVal === "GKV") return '<span class="badge gkv">GKV</span>';
-  if (strVal === "Unklar") return '<span class="badge unklar">Unklar</span>';
-  
-  let lower = strVal.toLowerCase();
-  if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("www.")) {
-    let url = lower.startsWith("www.") ? "https://" + strVal : strVal;
-    return `<a href="${url}" target="_blank" class="web-link">🔗 ${strVal}</a>`;
-  }
-  
-  return strVal;
-}
-
-function render() {
-  var q = document.getElementById("search").value.toLowerCase().trim();
-  var thead = document.getElementById("thead");
-  var tbody = document.getElementById("tbody");
-  var addActionBox = document.getElementById("addActionBox");
-  
-  addActionBox.style.display = (activeTab === "ALLE") ? "none" : "flex";
-  
-  var cols = [];
-  var displayRows = [];
-  
-  if (activeTab === "ALLE") {
-    cols = ["Kategorie", "Nachname / Einrichtung", "Vorname / Details", "Straße", "PLZ", "Ort", "Telefonnummer", "Versicherung", "Notizen"];
-    allData.forEach(item => {
-      var cat = item.category;
-      var rowData = [item.col1, item.col2, item.col3, item.col4, item.col5, item.col6, item.col7, item.col8, item.col9, item.col10, item.col11];
-      var fullText = (cat + " " + rowData.join(" ")).toLowerCase();
-      if (!q || fullText.indexOf(q) !== -1) {
-        if (cat.indexOf("Patienten") !== -1) {
-          displayRows.push({ id: item.id, cols: [cat, rowData[1], (rowData[2] + " " + (rowData[0] ? "(" + rowData[0] + ")" : "")).trim(), rowData[4], rowData[5], rowData[6], rowData[7], rowData[8], (rowData[9] + " " + rowData[10]).trim()] });
-        } else {
-          displayRows.push({ id: item.id, cols: [cat, rowData[0], "Einrichtung", rowData[1], rowData[2], rowData[3], rowData[4], "PKV: " + rowData[5] + " / GKV: " + rowData[6], rowData[8]] });
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Krankenfahrdienst Düren - Urlaubsplaner</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darker: '#090a0f',
+                        card: '#12151f',
+                        bordercolor: '#1e2433',
+                        calbg: '#f8fafc',
+                        calborder: '#e2e8f0',
+                        caltext: '#0f172a'
+                    }
+                }
+            }
         }
-      }
-    });
-  } else {
-    cols = categoryCols[activeTab];
-    allData.filter(item => item.category === activeTab).forEach(item => {
-      var rowData = [item.col1, item.col2, item.col3, item.col4, item.col5, item.col6, item.col7, item.col8, item.col9, item.col10, item.col11];
-      var fullText = rowData.join(" ").toLowerCase();
-      if (!q || fullText.indexOf(q) !== -1) {
-        displayRows.push({ id: item.id, raw: rowData, cols: rowData.slice(0, cols.length) });
-      }
-    });
-  }
-  
-  let headerCols = (activeTab === "ALLE") ? cols : cols.concat(["Aktion"]);
-  thead.innerHTML = headerCols.map(c => `<th>${c}</th>`).join("");
-  
-  if (displayRows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="${headerCols.length}" style="text-align:center; padding:20px; color:#94a3b8;">Keine Treffer gefunden</td></tr>`;
-  } else {
-    if (activeTab === "ALLE") {
-      tbody.innerHTML = displayRows.map(row => `<tr>${row.cols.map(v => `<td>${formatCell(v)}</td>`).join("")}</tr>`).join("");
-    } else {
-      tbody.innerHTML = displayRows.map(row => {
-        let cellsHtml = row.cols.map(v => `<td>${formatCell(v)}</td>`).join("");
-        return `<tr>${cellsHtml}<td><button class="btn-edit" onclick='openEditModal(${row.id}, ${JSON.stringify(row.raw)})'>Bearbeiten</button> <button class="btn-del" onclick="deleteEntry(${row.id})">Löschen</button></td></tr>`;
-      }).join("");
-    }
-  }
-  document.getElementById("count").textContent = displayRows.length + " Einträge gefunden";
-}
+    </script>
+    <!-- FontAwesome für Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090a0f; }
+        ::-webkit-scrollbar-thumb { background: #1e2433; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #333b52; }
+    </style>
+</head>
+<body class="bg-darker text-slate-100 min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
 
-function openAddModal() {
-  if (activeTab === "ALLE") return;
-  editId = null;
-  document.getElementById("modalTitle").textContent = "Neuen Eintrag hinzufügen";
-  document.getElementById("modalFormFields").innerHTML = categoryCols[activeTab].map((col, i) => `<div class="form-group"><label>${col}</label><input type="text" id="field_${i}"></div>`).join("");
-  document.getElementById("entryModal").style.display = "flex";
-}
+    <!-- Header -->
+    <header class="bg-card/85 backdrop-blur-xl border-b border-bordercolor sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="bg-gradient-to-br from-red-600 to-rose-700 p-3 rounded-2xl shadow-lg shadow-red-950/50 flex items-center justify-center border border-red-500/20">
+                    <i class="fa-solid fa-ambulance text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        Elite Krankenfahrdienst Düren
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Urlaubs- & Abwesenheitsplaner</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openEntryModal()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-red-900/40 transition-all duration-200 transform hover:-translate-y-0.5 flex items-center gap-2 border border-red-500/30">
+                    <i class="fa-solid fa-plus-circle text-sm"></i> Urlaub eintragen
+                </button>
+                <button onclick="openEmployeeModal()" class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-slate-200 px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <i class="fa-solid fa-user-gear text-red-400"></i> Mitarbeiter
+                </button>
+            </div>
+        </div>
+    </header>
 
-function openEditModal(id, rawData) {
-  editId = id;
-  document.getElementById("modalTitle").textContent = "Eintrag bearbeiten";
-  document.getElementById("modalFormFields").innerHTML = categoryCols[activeTab].map((col, i) => `<div class="form-group"><label>${col}</label><input type="text" id="field_${i}" value="${rawData[i] || ''}"></div>`).join("");
-  document.getElementById("entryModal").style.display = "flex";
-}
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
 
-function closeModal() { document.getElementById("entryModal").style.display = "none"; }
+        <!-- 12-Monats Schnell-Übersicht -->
+        <div class="bg-card/90 backdrop-blur-xl p-4 rounded-2xl border border-bordercolor shadow-xl">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 px-1 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-days text-red-500"></i> Monat wählen
+            </div>
+            <div id="quickMonthsGrid" class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+                <!-- JS befüllt -->
+            </div>
+        </div>
 
-async function saveEntryData() {
-  var values = categoryCols[activeTab].map((_, i) => document.getElementById(`field_${i}`).value);
-  
-  if (editId === null) {
-    const res = await fetch('/api/entries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: activeTab, cols: values }) });
-    if (res.ok) { closeModal(); loadData(); }
-  } else {
-    const res = await fetch(`/api/entries/${editId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: activeTab, cols: values }) });
-    if (res.ok) { closeModal(); loadData(); }
-  }
-}
+        <!-- Controls / Filters -->
+        <div class="bg-card/90 backdrop-blur-xl p-4 rounded-2xl border border-bordercolor shadow-xl flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/80 rounded-xl hover:bg-slate-700 transition text-slate-300 font-bold">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <select id="selectMonth" onchange="updateFilter()" class="bg-slate-900 border border-slate-700 text-slate-100 text-xs font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-red-500 outline-none cursor-pointer hover:border-slate-600 transition">
+                        <option value="0">Januar</option>
+                        <option value="1">Februar</option>
+                        <option value="2">März</option>
+                        <option value="3">April</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juni</option>
+                        <option value="6">Juli</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">Oktober</option>
+                        <option value="10">November</option>
+                        <option value="11">Dezember</option>
+                    </select>
+                    <select id="selectYear" onchange="updateFilter()" class="bg-slate-900 border border-slate-700 text-slate-100 text-xs font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-red-500 outline-none cursor-pointer hover:border-slate-600 transition">
+                        <!-- JS befüllt -->
+                    </select>
+                </div>
+                <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/80 rounded-xl hover:bg-slate-700 transition text-slate-300 font-bold">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
 
-async function deleteEntry(id) {
-  var rel = confirm("Eintrag wirklich löschen?");
-  if (!rel) return;
-  const res = await fetch(`/api/entries/${id}`, { method: 'DELETE' });
-  if (res.ok) loadData();
-}
+            <!-- Legend -->
+            <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
+                <span class="flex items-center gap-2 bg-blue-950/60 text-blue-300 px-3 py-1.5 rounded-xl border border-blue-900/50"><span class="w-2 h-2 rounded-full bg-blue-400"></span> Urlaub 🏖️</span>
+                <span class="flex items-center gap-2 bg-red-950/60 text-red-300 px-3 py-1.5 rounded-xl border border-red-900/50"><span class="w-2 h-2 rounded-full bg-red-500"></span> Krank 🤒</span>
+                <span class="flex items-center gap-2 bg-emerald-950/60 text-emerald-300 px-3 py-1.5 rounded-xl border border-emerald-900/50"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Unbezahlt 💶</span>
+                <span class="flex items-center gap-2 bg-slate-300 text-slate-800 px-3 py-1.5 rounded-xl border border-slate-400 font-bold"><span class="w-2 h-2 rounded-full bg-slate-500"></span> Wochenende</span>
+            </div>
+        </div>
 
-document.getElementById("search").oninput = render;
-window.onload = loadData;
-</script>
+        <!-- Matrix / Kalender-Ansicht (Heller Look) -->
+        <div class="bg-calbg rounded-2xl border border-calborder shadow-2xl overflow-hidden text-caltext">
+            <div class="overflow-x-auto p-2">
+                <table id="matrixTable" class="w-full text-left border-collapse text-xs">
+                    <!-- JS befüllt -->
+                </table>
+            </div>
+        </div>
+
+        <!-- Mitarbeiter & Urlaubskonten Übersicht (Heller Look) -->
+        <div class="bg-calbg rounded-2xl border border-calborder shadow-2xl overflow-hidden text-caltext p-6">
+            <h2 class="text-base font-bold text-slate-900 mb-5 flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center border border-red-200">
+                    <i class="fa-solid fa-users text-sm"></i>
+                </div>
+                Mitarbeiter & Urlaubskonten (<span id="currentYearDisplay" class="text-red-600"></span>)
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-calborder text-slate-700 bg-slate-200/80 font-bold uppercase tracking-wider">
+                            <th class="p-3.5 rounded-l-xl">Mitarbeiter</th>
+                            <th class="p-3.5">Abteilung</th>
+                            <th class="p-3.5 text-center">Urlaubsanspruch</th>
+                            <th class="p-3.5 text-center">Alturlaub (Übertrag)</th>
+                            <th class="p-3.5 text-center">Genommen</th>
+                            <th class="p-3.5 text-center">Resturlaub</th>
+                            <th class="p-3.5 text-right rounded-r-xl">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeTableBody" class="divide-y divide-calborder font-medium">
+                        <!-- JS befüllt -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Urlaub eintragen -->
+    <div id="entryModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-card rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-bordercolor transform transition-all">
+            <div class="bg-gradient-to-r from-red-950/80 to-slate-900 text-white px-5 py-4 flex justify-between items-center border-b border-bordercolor">
+                <h3 id="modalTitle" class="font-bold text-sm flex items-center gap-2 text-slate-100"><i class="fa-solid fa-calendar-plus text-red-500"></i> Abwesenheit eintragen</h3>
+                <button onclick="closeModal('entryModal')" class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+            <form id="entryForm" onsubmit="saveEntry(event)" class="p-5 space-y-4">
+                <input type="hidden" id="entryId">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Mitarbeiter</label>
+                    <select id="entryEmployee" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+                        <!-- JS befüllt -->
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Von Datum</label>
+                        <input type="date" id="entryStart" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Bis Datum</label>
+                        <input type="date" id="entryEnd" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Art der Abwesenheit</label>
+                    <select id="entryType" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+                        <option value="vacation">Urlaub 🏖️</option>
+                        <option value="sick">Krank 🤒</option>
+                        <option value="special">Unbezahlter Urlaub 💶</option>
+                    </select>
+                </div>
+                <div class="flex justify-between items-center pt-2">
+                    <button type="button" id="deleteEntryBtn" onclick="deleteCurrentEntry()" class="hidden bg-rose-950/60 hover:bg-rose-900/60 text-rose-400 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-rose-900/50"><i class="fa-solid fa-trash-can"></i> Löschen</button>
+                    <div class="flex gap-2 ml-auto">
+                        <button type="button" onclick="closeModal('entryModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold transition">Abbrechen</button>
+                        <button type="submit" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-red-900/40 transition">Speichern</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Mitarbeiter verwalten -->
+    <div id="employeeModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-card rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-bordercolor max-h-[90vh] flex flex-col">
+            <div class="bg-gradient-to-r from-red-950/80 to-slate-900 text-white px-5 py-4 flex justify-between items-center shrink-0 border-b border-bordercolor">
+                <h3 id="empModalTitle" class="font-bold text-sm flex items-center gap-2 text-slate-100"><i class="fa-solid fa-user-gear text-red-500"></i> Mitarbeiter hinzufügen</h3>
+                <button onclick="closeModal('employeeModal')" class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-5">
+                <form id="employeeForm" onsubmit="saveEmployee(event)" class="bg-slate-900/80 p-4 rounded-xl border border-bordercolor space-y-3">
+                    <input type="hidden" id="empId">
+                    <div class="text-[11px] font-bold text-red-400 uppercase tracking-wider flex items-center gap-2" id="empFormLegend">
+                        <i class="fa-solid fa-user-plus"></i> Neuen Mitarbeiter anlegen
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Vollständiger Name</label>
+                            <input type="text" id="empName" required placeholder="z.B. Max Mustermann" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Abteilung</label>
+                            <input type="text" id="empDept" required placeholder="z.B. Fahrdienst" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Jahresurlaub (Tage)</label>
+                        <input type="number" id="empVacationDays" required value="30" min="0" max="60" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
+                    </div>
+                    <div class="flex justify-end gap-2 pt-1">
+                        <button type="button" id="cancelEmpEditBtn" onclick="resetEmployeeForm()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl text-xs font-bold transition">Abbrechen</button>
+                        <button type="submit" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition">Speichern</button>
+                    </div>
+                </form>
+
+                <div>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Vorhandene Mitarbeiter (Bearbeiten / Löschen)</div>
+                    <div id="modalEmployeeList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <!-- JS befüllt -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-card rounded-2xl shadow-2xl max-w-sm w-full border border-bordercolor text-center p-5 space-y-3">
+            <div class="w-10 h-10 bg-rose-950 text-rose-400 rounded-xl flex items-center justify-center mx-auto text-base border border-rose-900">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="alertTitle" class="font-bold text-sm text-white">Hinweis</h3>
+            <p id="alertMessage" class="text-xs font-medium text-slate-300"></p>
+            <button onclick="closeModal('alertModal')" class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg transition">Verstanden</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logik -->
+    <script>
+        let employees = JSON.parse(localStorage.getItem('elite_kranken_employees')) || [
+            { id: '1', name: 'Mustafa Yilmaz', dept: 'Fahrdienst', vacationDays: 30, carryoverByYear: {} },
+            { id: '2', name: 'Anna Schmidt', dept: 'Disposition', vacationDays: 30, carryoverByYear: {} },
+            { id: '3', name: 'Thomas Weber', dept: 'Fahrdienst', vacationDays: 28, carryoverByYear: {} }
+        ];
+
+        let entries = JSON.parse(localStorage.getItem('elite_kranken_entries')) || [];
+        let currentDate = new Date(2027, 0, 1);
+
+        const typeLabels = { vacation: 'Urlaub', sick: 'Krank', special: 'Unbezahlter Urlaub' };
+        const typeConfig = {
+            vacation: { class: 'bg-blue-600 text-white shadow-md hover:scale-110 transition-transform duration-200', icon: 'fa-check' },
+            sick: { class: 'bg-red-600 text-white shadow-md hover:scale-110 transition-transform duration-200', icon: 'fa-xmark' },
+            special: { class: 'bg-emerald-600 text-white shadow-md hover:scale-110 transition-transform duration-200', icon: 'fa-check' }
+        };
+
+        const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+        const dayNamesShort = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+        // Einheitlicher, sehr schöner Hellblau-Ton für alle Abteilungen
+        const deptColorStyle = 'bg-sky-100 text-sky-700 border-sky-200';
+
+        function getDeptStyle(deptName) {
+            return deptColorStyle;
+        }
+
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function getHolidays(year) {
+            const holidays = {};
+            holidays[`${year}-01-01`] = 'Neujahr';
+            holidays[`${year}-05-01`] = 'Tag der Arbeit';
+            holidays[`${year}-10-03`] = 'Tag der Deutschen Einheit';
+            holidays[`${year}-11-01`] = 'Allerheiligen';
+            holidays[`${year}-12-25`] = '1. Weihnachtstag';
+            holidays[`${year}-12-26`] = '2. Weihnachtstag';
+
+            const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+            const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+            const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            const month = Math.floor((h + l - 7 * m + 114) / 31);
+            const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+            const easterSunday = new Date(year, month - 1, day);
+            const addDays = (date, days) => {
+                const res = new Date(date);
+                res.setDate(res.getDate() + days);
+                return res.toISOString().split('T')[0];
+            };
+
+            holidays[addDays(easterSunday, -2)] = 'Karfreitag';
+            holidays[addDays(easterSunday, 1)] = 'Ostermontag';
+            holidays[addDays(easterSunday, 39)] = 'Christi Himmelfahrt';
+            holidays[addDays(easterSunday, 50)] = 'Pfingstmontag';
+            holidays[addDays(easterSunday, 60)] = 'Fronleichnam';
+            return holidays;
+        }
+
+        function initApp() {
+            const yearSelect = document.getElementById('selectYear');
+            yearSelect.innerHTML = '';
+            const curY = currentDate.getFullYear();
+            for (let y = 2027; y <= 2045; y++) {
+                let opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if (y === curY) opt.selected = true;
+                yearSelect.appendChild(opt);
+            }
+            document.getElementById('selectMonth').value = currentDate.getMonth();
+            renderQuickMonths();
+            render();
+        }
+
+        function renderQuickMonths() {
+            const grid = document.getElementById('quickMonthsGrid');
+            grid.innerHTML = '';
+            const curM = currentDate.getMonth();
+            monthNames.forEach((name, idx) => {
+                let isSelected = (idx === curM);
+                let btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `py-2 px-1 text-xs font-bold rounded-xl transition-all border ${
+                    isSelected 
+                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white border-red-500 shadow-md shadow-red-950 scale-105' 
+                        : 'bg-slate-900 hover:bg-slate-800 text-slate-400 border-bordercolor hover:text-slate-200'
+                }`;
+                btn.textContent = name.substring(0, 3);
+                btn.onclick = () => {
+                    currentDate.setMonth(idx);
+                    document.getElementById('selectMonth').value = idx;
+                    renderQuickMonths();
+                    render();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateFilter() {
+            currentDate.setFullYear(parseInt(document.getElementById('selectYear').value));
+            currentDate.setMonth(parseInt(document.getElementById('selectMonth').value));
+            renderQuickMonths();
+            render();
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            document.getElementById('selectYear').value = currentDate.getFullYear();
+            document.getElementById('selectMonth').value = currentDate.getMonth();
+            renderQuickMonths();
+            render();
+        }
+
+        function render() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('currentYearDisplay').textContent = year;
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const holidays = getHolidays(year);
+
+            let tableHTML = `<thead><tr class="border-b border-calborder text-slate-700 bg-slate-200/80 font-bold">`;
+            tableHTML += `<th class="p-3.5 sticky left-0 bg-slate-200 z-10 min-w-[200px] rounded-l-xl text-slate-800">Mitarbeiter</th>`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateObj = new Date(year, month, d);
+                const dayOfWeek = dateObj.getDay();
+                const dayNameShort = dayNamesShort[dayOfWeek];
+                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                const isHoliday = holidays[dateStr];
+
+                let bgClass = "bg-transparent text-slate-700";
+                let tooltip = `${dayNameShort}, der ${d}.`;
+
+                if (isHoliday) {
+                    bgClass = "bg-rose-200 text-rose-800 font-bold border-b-2 border-rose-500";
+                    tooltip = `${dayNameShort} (${holidays[dateStr]})`;
+                } else if (isWeekend) {
+                    bgClass = "bg-slate-300 text-slate-900 font-bold border-b-2 border-slate-400";
+                    tooltip = `${dayNameShort} (Wochenende)`;
+                }
+
+                tableHTML += `<th class="p-2 text-center w-9 text-[11px] ${bgClass}" title="${tooltip}"><div class="text-[9px] uppercase tracking-wider opacity-75">${dayNameShort}</div><span class="text-xs">${d}</span></th>`;
+            }
+            tableHTML += `<th class="rounded-r-xl w-2"></th></tr></thead><tbody class="divide-y divide-calborder">`;
+
+            if (employees.length === 0) {
+                tableHTML += `<tr><td colspan="${daysInMonth + 2}" class="p-10 text-center text-slate-500 font-medium">Keine Mitarbeiter vorhanden.</td></tr>`;
+            } else {
+                employees.forEach(emp => {
+                    const deptStyle = getDeptStyle(emp.dept);
+                    tableHTML += `<tr class="hover:bg-slate-200/50 transition-colors">`;
+                    tableHTML += `<td class="p-3.5 sticky left-0 bg-calbg font-bold text-indigo-900 border-r border-calborder">
+                        <div class="truncate max-w-[170px]">${emp.name}</div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border inline-block mt-1 ${deptStyle}">${emp.dept}</span>
+                    </td>`;
+
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                        const dateObj = new Date(year, month, d);
+                        const dayOfWeek = dateObj.getDay();
+                        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                        const isHoliday = holidays[dateStr];
+
+                        let entry = null;
+                        if (!isWeekend) {
+                            entry = entries.find(e => e.employeeId === emp.id && dateStr >= e.start && dateStr <= e.end);
+                        }
+
+                        if (entry) {
+                            const cfg = typeConfig[entry.type] || { class: 'bg-blue-600 text-white', icon: 'fa-check' };
+                            const label = typeLabels[entry.type] || entry.type;
+                            tableHTML += `<td class="p-0.5 text-center ${isWeekend ? 'bg-slate-300/60' : ''}"><div onclick="editEntry('${entry.id}')" class="w-7 h-7 mx-auto rounded-lg flex items-center justify-center cursor-pointer text-[10px] ${cfg.class}" title="${label}"><i class="fa-solid ${cfg.icon}"></i></div></td>`;
+                        } else if (isWeekend) {
+                            tableHTML += `<td class="p-0.5 text-center bg-slate-300/60"><div class="w-7 h-7 mx-auto flex items-center justify-center text-slate-400 text-[10px]">·</div></td>`;
+                        } else {
+                            tableHTML += `<td class="p-0.5 text-center"><div onclick="quickAdd('${emp.id}', '${dateStr}')" class="w-7 h-7 mx-auto rounded-lg hover:bg-slate-300/70 cursor-pointer transition flex items-center justify-center text-slate-400 hover:text-red-600 font-bold">+</div></td>`;
+                        }
+                    }
+                    tableHTML += `<td></td></tr>`;
+                });
+            }
+            tableHTML += `</tbody>`;
+            document.getElementById('matrixTable').innerHTML = tableHTML;
+
+            let empTableHTML = '';
+            employees.forEach((emp, index) => {
+                let takenDays = 0;
+                entries.filter(e => e.employeeId === emp.id && e.type === 'vacation').forEach(e => {
+                    let start = new Date(e.start), end = new Date(e.end), curr = new Date(start);
+                    while (curr <= end) {
+                        let dayW = curr.getDay();
+                        if (curr.getFullYear() === year && dayW !== 0 && dayW !== 6) {
+                            takenDays++;
+                        }
+                        curr.setDate(curr.getDate() + 1);
+                    }
+                });
+
+                if (!emp.carryoverByYear) emp.carryoverByYear = {};
+                let carryover = emp.carryoverByYear[year] || 0;
+                let totalClaim = emp.vacationDays + carryover;
+                let remaining = totalClaim - takenDays;
+                const deptStyle = getDeptStyle(emp.dept);
+
+                empTableHTML += `
+                    <tr class="hover:bg-slate-200/50 transition-colors">
+                        <td class="p-3.5 font-bold text-indigo-900">${emp.name}</td>
+                        <td class="p-3.5"><span class="border px-3 py-1 rounded-lg text-[11px] font-bold shadow-sm inline-block ${deptStyle}">${emp.dept}</span></td>
+                        <td class="p-3.5 text-center font-bold text-slate-700">${emp.vacationDays} Tage</td>
+                        <td class="p-3.5 text-center">
+                            <input type="number" value="${carryover}" min="0" max="40" step="0.5" 
+                                onchange="updateCarryover('${emp.id}', this.value)" 
+                                class="w-16 bg-white border border-calborder rounded-lg p-1.5 text-center text-xs font-bold text-slate-800 focus:ring-2 focus:ring-red-500 outline-none shadow-sm">
+                        </td>
+                        <td class="p-3.5 text-center text-blue-600 font-bold">${takenDays} Tage</td>
+                        <td class="p-3.5 text-center font-bold ${remaining < 0 ? 'text-rose-600' : 'text-emerald-600'}">${remaining} Tage</td>
+                        <td class="p-3.5 text-right space-x-0.5 whitespace-nowrap">
+                            <button type="button" onclick="moveEmployee(${index}, -1)" ${index === 0 ? 'disabled class="opacity-20 cursor-not-allowed"' : ''} class="text-slate-500 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-300/60 transition" title="Nach oben verschieben"><i class="fa-solid fa-chevron-up text-xs"></i></button>
+                            <button type="button" onclick="moveEmployee(${index}, 1)" ${index === employees.length - 1 ? 'disabled class="opacity-20 cursor-not-allowed"' : ''} class="text-slate-500 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-300/60 transition" title="Nach unten verschieben"><i class="fa-solid fa-chevron-down text-xs"></i></button>
+                            <button onclick="editEmployee('${emp.id}')" class="text-slate-500 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-300/60 transition" title="Bearbeiten"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="deleteEmployee('${emp.id}')" class="text-slate-500 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-100 transition" title="Löschen"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('employeeTableBody').innerHTML = empTableHTML;
+
+            const empSelect = document.getElementById('entryEmployee');
+            empSelect.innerHTML = '';
+            employees.forEach(emp => {
+                let opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.textContent = `${emp.name} (${emp.dept})`;
+                empSelect.appendChild(opt);
+            });
+
+            renderModalEmployeeList();
+        }
+
+        function updateCarryover(empId, val) {
+            const year = currentDate.getFullYear();
+            const emp = employees.find(e => e.id === empId);
+            if (emp) {
+                if (!emp.carryoverByYear) emp.carryoverByYear = {};
+                emp.carryoverByYear[year] = parseFloat(val) || 0;
+                localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+                render();
+            }
+        }
+
+        function renderModalEmployeeList() {
+            const list = document.getElementById('modalEmployeeList');
+            if (employees.length === 0) {
+                list.innerHTML = '<div class="text-xs text-slate-500 p-2 text-center">Keine Mitarbeiter.</div>';
+                return;
+            }
+            let html = '';
+            employees.forEach((emp) => {
+                const deptStyle = getDeptStyle(emp.dept);
+                html += `
+                    <div class="flex items-center justify-between p-3 bg-slate-950 border border-bordercolor rounded-xl">
+                        <div>
+                            <div class="text-xs font-bold text-slate-200">${emp.name}</div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${deptStyle}">${emp.dept}</span>
+                                <span class="text-[10px] text-slate-400">${emp.vacationDays} Tage</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="editEmployee('${emp.id}')" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                            <button type="button" onclick="deleteEmployee('${emp.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-950/50"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function moveEmployee(index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= employees.length) return;
+            const temp = employees[index];
+            employees[index] = employees[targetIndex];
+            employees[targetIndex] = temp;
+            localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+            render();
+        }
+
+        function openEntryModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-calendar-plus text-red-500"></i> Abwesenheit eintragen';
+            document.getElementById('entryId').value = '';
+            document.getElementById('entryForm').reset();
+            document.getElementById('deleteEntryBtn').classList.add('hidden');
+            let todayStr = `${currentDate.getFullYear()}-01-01`;
+            let dObj = new Date(todayStr);
+            if (dObj.getDay() === 0) dObj.setDate(dObj.getDate() + 1);
+            else if (dObj.getDay() === 6) dObj.setDate(dObj.getDate() + 2);
+            todayStr = dObj.toISOString().split('T')[0];
+            document.getElementById('entryStart').value = todayStr;
+            document.getElementById('entryEnd').value = todayStr;
+            document.getElementById('entryModal').classList.remove('hidden');
+        }
+
+        function quickAdd(empId, dateStr) {
+            const dObj = new Date(dateStr);
+            if (dObj.getDay() === 0 || dObj.getDay() === 6) {
+                showAlert("Wochenende", "Samstage und Sonntage sind arbeitsfrei.");
+                return;
+            }
+            openEntryModal();
+            document.getElementById('entryEmployee').value = empId;
+            document.getElementById('entryStart').value = dateStr;
+            document.getElementById('entryEnd').value = dateStr;
+        }
+
+        function editEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-red-500"></i> Abwesenheit bearbeiten';
+            document.getElementById('entryId').value = entry.id;
+            document.getElementById('entryEmployee').value = entry.employeeId;
+            document.getElementById('entryStart').value = entry.start;
+            document.getElementById('entryEnd').value = entry.end;
+            document.getElementById('entryType').value = entry.type;
+            document.getElementById('deleteEntryBtn').classList.remove('hidden');
+            document.getElementById('entryModal').classList.remove('hidden');
+        }
+
+        function saveEntry(e) {
+            e.preventDefault();
+            const id = document.getElementById('entryId').value;
+            const employeeId = document.getElementById('entryEmployee').value;
+            const start = document.getElementById('entryStart').value;
+            const end = document.getElementById('entryEnd').value;
+            const type = document.getElementById('entryType').value;
+
+            if (start > end) {
+                showAlert("Ungültiger Zeitraum", "Das Startdatum muss vor oder gleich dem Enddatum sein.");
+                return;
+            }
+
+            if (id) {
+                let entry = entries.find(e => e.id === id);
+                if (entry) { entry.employeeId = employeeId; entry.start = start; entry.end = end; entry.type = type; }
+            } else {
+                entries.push({ id: 'e_' + Date.now(), employeeId, start, end, type });
+            }
+            localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+            closeModal('entryModal');
+            render();
+        }
+
+        function deleteCurrentEntry() {
+            const id = document.getElementById('entryId').value;
+            if (id && confirm("Eintrag wirklich löschen?")) {
+                entries = entries.filter(e => e.id !== id);
+                localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+                closeModal('entryModal');
+                render();
+            }
+        }
+
+        function openEmployeeModal() {
+            resetEmployeeForm();
+            document.getElementById('employeeModal').classList.remove('hidden');
+        }
+
+        function resetEmployeeForm() {
+            document.getElementById('empId').value = '';
+            document.getElementById('empName').value = '';
+            document.getElementById('empDept').value = '';
+            document.getElementById('empVacationDays').value = '30';
+            document.getElementById('empFormLegend').innerHTML = '<i class="fa-solid fa-user-plus"></i> Neuen Mitarbeiter anlegen';
+            document.getElementById('cancelEmpEditBtn').classList.add('hidden');
+        }
+
+        function editEmployee(id) {
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            document.getElementById('empId').value = emp.id;
+            document.getElementById('empName').value = emp.name;
+            document.getElementById('empDept').value = emp.dept;
+            document.getElementById('empVacationDays').value = emp.vacationDays;
+            document.getElementById('empFormLegend').innerHTML = `<i class="fa-solid fa-pen"></i> Bearbeiten: ${emp.name}`;
+            document.getElementById('cancelEmpEditBtn').classList.remove('hidden');
+            document.getElementById('employeeModal').classList.remove('hidden');
+        }
+
+        function saveEmployee(e) {
+            e.preventDefault();
+            closeModal('employeeModal');
+
+            const id = document.getElementById('empId').value;
+            const name = document.getElementById('empName').value;
+            const dept = document.getElementById('empDept').value;
+            const vacationDays = parseInt(document.getElementById('empVacationDays').value);
+
+            if (id) {
+                let emp = employees.find(e => e.id === id);
+                if (emp) { emp.name = name; emp.dept = dept; emp.vacationDays = vacationDays; }
+            } else {
+                employees.push({ id: 'emp_' + Date.now(), name, dept, vacationDays, carryoverByYear: {} });
+            }
+            localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+            resetEmployeeForm();
+            render();
+        }
+
+        function deleteEmployee(id) {
+            if (confirm("Mitarbeiter und alle dazugehörigen Einträge löschen?")) {
+                employees = employees.filter(e => e.id !== id);
+                entries = entries.filter(e => e.employeeId !== id);
+                localStorage.setItem('elite_kranken_employees', JSON.stringify(employees));
+                localStorage.setItem('elite_kranken_entries', JSON.stringify(entries));
+                render();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        window.onload = initApp;
+    </script>
 </body>
 </html>
