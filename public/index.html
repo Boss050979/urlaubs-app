@@ -110,6 +110,7 @@
             <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
                 <span class="flex items-center gap-2 bg-blue-950/60 text-blue-300 px-3 py-1.5 rounded-xl border border-blue-900/50"><span class="w-2 h-2 rounded-full bg-blue-400"></span> Urlaub 🏖️</span>
                 <span class="flex items-center gap-2 bg-red-950/60 text-red-300 px-3 py-1.5 rounded-xl border border-red-900/50"><span class="w-2 h-2 rounded-full bg-red-500"></span> Krank 🤒</span>
+                <span class="flex items-center gap-2 bg-purple-950/60 text-purple-300 px-3 py-1.5 rounded-xl border border-purple-900/50"><span class="w-2 h-2 rounded-full bg-purple-400"></span> Frei 🌴</span>
                 <span class="flex items-center gap-2 bg-emerald-950/60 text-emerald-300 px-3 py-1.5 rounded-xl border border-emerald-900/50"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Unbezahlt 💶</span>
                 <span class="flex items-center gap-2 bg-slate-300 text-slate-800 px-3 py-1.5 rounded-xl border border-slate-400 font-bold"><span class="w-2 h-2 rounded-full bg-slate-500"></span> Wochenende</span>
             </div>
@@ -184,6 +185,7 @@
                     <select id="entryType" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-100 focus:ring-2 focus:ring-red-500 outline-none">
                         <option value="vacation">Urlaub 🏖️</option>
                         <option value="sick">Krank 🤒</option>
+                        <option value="free">Frei 🌴</option>
                         <option value="special">Unbezahlter Urlaub 💶</option>
                     </select>
                 </div>
@@ -264,10 +266,11 @@
         let entries = JSON.parse(localStorage.getItem('elite_kranken_entries')) || [];
         let currentDate = new Date(2027, 0, 1);
 
-        const typeLabels = { vacation: 'Urlaub', sick: 'Krank', special: 'Unbezahlter Urlaub' };
+        const typeLabels = { vacation: 'Urlaub', sick: 'Krank', free: 'Frei', special: 'Unbezahlter Urlaub' };
         const typeConfig = {
             vacation: { class: 'bg-blue-600 text-white shadow-md hover:scale-110 transition-transform duration-200', icon: 'fa-check' },
             sick: { class: 'bg-red-600 text-white shadow-md hover:scale-110 transition-transform duration-200', icon: 'fa-xmark' },
+            free: { class: 'bg-purple-600 text-white shadow-md hover:scale-110 transition-transform duration-200', icon: 'fa-star' },
             special: { class: 'bg-emerald-600 text-white shadow-md hover:scale-110 transition-transform duration-200', icon: 'fa-check' }
         };
 
