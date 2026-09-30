@@ -141,8 +141,9 @@
                             <th class="p-3.5">Abteilung</th>
                             <th class="p-3.5 text-center">Urlaubsanspruch</th>
                             <th class="p-3.5 text-center">Alturlaub (Übertrag)</th>
+                            <th class="p-3.5 text-center">Alturlaub Rest</th>
                             <th class="p-3.5 text-center">Genommen</th>
-                            <th class="p-3.5 text-center">Resturlaub</th>
+                            <th class="p-3.5 text-center">Jahresurlaub Rest</th>
                             <th class="p-3.5 text-right rounded-r-xl">Aktionen</th>
                         </tr>
                     </thead>
@@ -468,8 +469,11 @@
 
                 if (!emp.carryoverByYear) emp.carryoverByYear = {};
                 let carryover = emp.carryoverByYear[year] || 0;
-                let totalClaim = emp.vacationDays + carryover;
-                let remaining = totalClaim - takenDays;
+                // Verbrauchsreihenfolge: zuerst Alturlaub, danach Jahresurlaub
+                let usedCarryover = Math.min(takenDays, carryover);
+                let remainingCarryover = Math.max(0, carryover - takenDays);
+                let usedCurrentVacation = Math.max(0, takenDays - carryover);
+                let remaining = emp.vacationDays - usedCurrentVacation;
                 const deptStyle = getDeptStyle(emp.dept);
 
                 empTableHTML += `
@@ -482,7 +486,8 @@
                                 onchange="updateCarryover('${emp.id}', this.value)" 
                                 class="w-16 bg-white border border-calborder rounded-lg p-1.5 text-center text-xs font-bold text-slate-800 focus:ring-2 focus:ring-red-500 outline-none shadow-sm">
                         </td>
-                        <td class="p-3.5 text-center text-blue-600 font-bold">${takenDays} Tage</td>
+                        <td class="p-3.5 text-center font-bold ${remainingCarryover > 0 ? 'text-amber-600' : 'text-slate-500'}">${remainingCarryover} Tage</td>
+                        <td class="p-3.5 text-center text-blue-600 font-bold" title="Davon ${usedCarryover} Tage Alturlaub und ${usedCurrentVacation} Tage Jahresurlaub">${takenDays} Tage</td>
                         <td class="p-3.5 text-center font-bold ${remaining < 0 ? 'text-rose-600' : 'text-emerald-600'}">${remaining} Tage</td>
                         <td class="p-3.5 text-right space-x-0.5 whitespace-nowrap">
                             <button type="button" onclick="moveEmployee(${index}, -1)" ${index === 0 ? 'disabled class="opacity-20 cursor-not-allowed"' : ''} class="text-slate-500 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-300/60 transition" title="Nach oben verschieben"><i class="fa-solid fa-chevron-up text-xs"></i></button>
